@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#fff4f9">
+<meta name="format-detection" content="telephone=no">
+<title>致 韩言 ♡</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='25' font-size='24'%3E%F0%9F%92%8C%3C/text%3E%3C/svg%3E">
+<style>
+  /* ============================================================
+     0. 变量与基础
+     ============================================================ */
+  :root {
+    --gold-deep:  #b8863b;
+    --gold-mid:   #e8c87e;
+    --gold-light: #fff6d6;
+    --gold-line:  rgba(232, 200, 126, .6);
+
+    --pink-1: #ff9ec4;
+    --pink-2: #ff4d94;
+    --pink-3: #d42a6f;
+
+    --ink:       #54464e;
+    --ink-soft:  #6b5560;
+    --ink-muted: #b892a6;
+    --ink-faint: #c48aa8;
+
+    --paper-top: #fffdfb;
+    --paper-mid: #fff9f4;
+    --paper-bot: #fff6ee;
+
+    --ease-soft: cubic-bezier(.2, .85, .3, 1);
+    --ease-flip: cubic-bezier(.55, .05, .3, 1);
+    --ease-pop:  cubic-bezier(.34, 1.56, .64, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html {
+    height: 100%;
+    overscroll-behavior: none;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    overscroll-behavior: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(ellipse 70% 45% at 50% -12%, rgba(255, 240, 214, .9), transparent),
+      radial-gradient(circle at 12% 8%,  rgba(255, 206, 232, .95), transparent 46%),
+      radial-gradient(circle at 88% 14%, rgba(222, 208, 255, .8),  transparent 46%),
+      radial-gradient(circle at 50% 110%, rgba(255, 226, 206, .95), transparent 55%),
+      linear-gradient(165deg, #fffafd, #ffedf5 40%, #f4e9ff 74%, #fdf4ec);
+    font-family: "Kaiti SC", "STKaiti", "KaiTi", "楷体", "Songti SC", Georgia, serif;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- 漂移极光 ---------- */
+  body::before,
+  body::after {
+    content: '';
+    position: fixed;
+    width: 78vmax;
+    height: 78vmax;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(46px);
+    opacity: .5;
+    will-change: transform;
+  }
+  body::before {
+    top: -34vmax; left: -24vmax;
+    background: radial-gradient(circle, rgba(255, 186, 218, .6), transparent 66%);
+    animation: drift1 28s ease-in-out infinite alternate;
+  }
+  body::after {
+    bottom: -38vmax; right: -28vmax;
+    background: radial-gradient(circle, rgba(206, 188, 255, .5), transparent 66%);
+    animation: drift2 34s ease-in-out infinite alternate;
+  }
+  @keyframes drift1 { to { transform: translate(15vmax, 11vmax) scale(1.16); } }
+  @keyframes drift2 { to { transform: translate(-13vmax, -9vmax) scale(1.12); } }
+
+  /* ---------- 背景画布 ---------- */
+  #bg {
+    position: fixed;
+    inset: 0;
+    display: block;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ============================================================
+     1. 舞台
+     ============================================================ */
+  .stage {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    padding-top:    max(20px, env(safe-area-inset-top));
+    padding-right:  max(20px, env(safe-area-inset-right));
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+    padding-left:   max(20px, env(safe-area-inset-left));
+    display: grid;
+    place-items: center;
+  }
+  .stage > * { grid-area: 1 / 1; }
+
+  /* ============================================================
+     2. 信封
+     ============================================================ */
+  .envelope-wrap {
+    position: relative;
+    width: min(78vw, 320px);
+    aspect-ratio: 16 / 11;
+    perspective: 1000px;
+    cursor: pointer;
+    animation: floaty 4.6s ease-in-out infinite;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  @keyframes floaty {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-11px); }
+  }
+  .envelope-wrap.open { pointer-events: none; cursor: default; }
+
+  .envelope {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    filter:
+      drop-shadow(0 28px 46px rgba(224, 120, 170, .42))
+      drop-shadow(0 0 22px rgba(255, 206, 140, .35));
+    transition: transform .9s var(--ease-flip), opacity .75s ease;
+    will-change: transform, opacity;
+  }
+  .envelope-wrap.open .envelope {
+    opacity: 0;
+    transform: scale(1.15) rotateX(36deg) translateY(-28px);
+  }
+
+  .env-body {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: linear-gradient(158deg, #ffd8e8, #ffa6c8);
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, .7),
+      inset 0 0 0 2px rgba(240, 217, 160, .78),
+      inset 0 0 0 3px rgba(255, 255, 255, .45);
+  }
+  /* 信封纸纹 */
+  .env-body::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(45deg,  rgba(255, 255, 255, .05) 0 1px, transparent 1px 6px),
+      repeating-linear-gradient(-45deg, rgba(190, 120, 150, .05) 0 1px, transparent 1px 8px);
+    pointer-events: none;
+  }
+
+  .side { position: absolute; inset: 0; }
+  .side.left   { clip-path: polygon(0 0, 50% 50%, 0 100%);       background: linear-gradient(90deg,  #ffc9de, #ffb4d1); }
+  .side.right  { clip-path: polygon(100% 0, 100% 100%, 50% 50%); background: linear-gradient(270deg, #ffc9de, #ffb4d1); }
+  .side.bottom { clip-path: polygon(0 100%, 50% 50%, 100% 100%); background: linear-gradient(0deg,   #ffb8d3, #ffd2e4); }
+
+  .env-flap {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    clip-path: polygon(0 0, 100% 0, 50% 58%);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, .34), transparent 46%),
+      linear-gradient(180deg, #ff8fb9, #ffa9ca);
+    transform-origin: 50% 0;
+    backface-visibility: hidden;
+    transition: transform .85s var(--ease-flip);
+    box-shadow: 0 2px 6px rgba(220, 110, 160, .25);
+  }
+  .envelope-wrap.open .env-flap { transform: rotateX(-180deg); }
+
+  .env-label {
+    position: absolute;
+    z-index: 4;
+    left: 50%;
+    top: 64%;
+    transform: translate(-50%, -50%) rotate(-3deg);
+    font-size: clamp(13px, 3.8vw, 15.5px);
+    letter-spacing: .3em;
+    text-indent: .3em;
+    color: #b8406f;
+    opacity: .9;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .68);
+    pointer-events: none;
+    transition: opacity .4s;
+  }
+
+  /* 金色火漆 */
+  .seal {
+    position: absolute;
+    z-index: 5;
+    left: 50%;
+    top: 50%;
+    width:  clamp(46px, 13vw, 54px);
+    height: clamp(46px, 13vw, 54px);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    display: grid;
+    place-items: center;
+    background:
+      radial-gradient(circle at 34% 28%, #fff9e6, #f0d79a 38%, #d9b268 64%, #b0833c 88%, #9a6e2e);
+    box-shadow:
+      0 5px 14px rgba(150, 100, 40, .42),
+      0 0 18px rgba(240, 200, 120, .5),
+      inset 0 1px 2px rgba(255, 255, 255, .85),
+      inset 0 -3px 6px rgba(120, 80, 20, .42),
+      inset 0 0 0 2px rgba(255, 248, 225, .35);
+    transition: opacity .4s, transform .5s;
+  }
+  .seal::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 248, 225, .45);
+    box-shadow:
+      inset 0 1px 2px rgba(255, 255, 255, .5),
+      inset 0 -1px 2px rgba(120, 80, 20, .4);
+  }
+  .seal::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 32% 26%, rgba(255, 255, 255, .55), transparent 42%);
+    pointer-events: none;
+  }
+  .seal svg {
+    position: relative;
+    z-index: 1;
+    width: 58%;
+    height: 58%;
+    display: block;
+    filter: drop-shadow(0 1px 1px rgba(90, 40, 60, .5));
+  }
+  .envelope-wrap.open .seal {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.7) rotate(24deg);
+  }
+  .envelope-wrap.open .env-label { opacity: 0; }
+
+  .hint {
+    position: absolute;
+    left: 50%;
+    bottom: -46px;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-size: 14px;
+    letter-spacing: .26em;
+    text-indent: .26em;
+    color: #c98fae;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .7);
+    animation: breathe 2.6s ease-in-out infinite;
+    transition: opacity .4s;
+  }
+  @keyframes breathe {
+    0%, 100% { opacity: .42; }
+    50%      { opacity: 1; }
+  }
+  .envelope-wrap.open .hint { opacity: 0; }
+
+  /* ============================================================
+     3. 信纸
+     ============================================================ */
+  .letter {
+    position: relative;
+    width: min(92vw, 540px);
+    opacity: 0;
+    transform: scale(.82) translateY(36px);
+    pointer-events: none;
+    transition: opacity .85s ease, transform .85s var(--ease-soft);
+    will-change: transform, opacity;
+  }
+  .letter.show {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+
+  /* 展开时金色扫光 */
+  .letter::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    z-index: 6;
+    pointer-events: none;
+    opacity: 0;
+    background: linear-gradient(105deg,
+      transparent 18%,
+      rgba(255, 244, 208, .55) 40%,
+      rgba(255, 255, 255, .92) 50%,
+      rgba(255, 244, 208, .55) 60%,
+      transparent 82%);
+    background-size: 320% 100%;
+    background-position: 160% 0;
+  }
+  .letter.show::before {
+    animation: letterSweep 1.9s ease-out .38s 1 both;
+  }
+  @keyframes letterSweep {
+    0%   { opacity: 0; background-position: 160% 0; }
+    14%  { opacity: 1; }
+    72%  { opacity: .85; }
+    100% { opacity: 0; background-position: -70% 0; }
+  }
+
+  /* 底部滚动渐隐 */
+  .letter::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 62px;
+    background: linear-gradient(to bottom, rgba(255, 250, 245, 0), var(--paper-bot) 82%);
+    border-radius: 0 0 10px 10px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .3s;
+    z-index: 2;
+  }
+  .letter.scrollable::after { opacity: 1; }
+
+  /* 四角金线 */
+  .corner {
+    position: absolute;
+    width:  clamp(22px, 6vw, 30px);
+    height: clamp(22px, 6vw, 30px);
+    z-index: 4;
+    pointer-events: none;
+  }
+  .corner::before,
+  .corner::after {
+    content: '';
+    position: absolute;
+    background: linear-gradient(90deg, #c99a4a, #f2dfa8 55%, #d4af6a);
+    border-radius: 2px;
+    opacity: .88;
+  }
+  .corner::before { width: 100%; height: 1.5px; }
+  .corner::after  { width: 1.5px; height: 100%; }
+
+  .corner.tl { top: 7px;    left: 7px; }
+  .corner.tl::before { top: 0; left: 0; }
+  .corner.tl::after  { top: 0; left: 0; }
+
+  .corner.tr { top: 7px;    right: 7px; }
+  .corner.tr::before { top: 0; right: 0; }
+  .corner.tr::after  { top: 0; right: 0; }
+
+  .corner.bl { bottom: 7px; left: 7px; }
+  .corner.bl::before { bottom: 0; left: 0; }
+  .corner.bl::after  { bottom: 0; left: 0; }
+
+  .corner.br { bottom: 7px; right: 7px; }
+  .corner.br::before { bottom: 0; right: 0; }
+  .corner.br::after  { bottom: 0; right: 0; }
+
+  /* 滚动提示箭头 */
+  .scroll-cue {
+    position: absolute;
+    left: 50%;
+    bottom: 12px;
+    width: 22px;
+    height: 22px;
+    margin-left: -11px;
+    color: #d2a07e;
+    opacity: 0;
+    transition: opacity .35s;
+    pointer-events: none;
+    z-index: 5;
+    filter: drop-shadow(0 1px 2px rgba(255, 255, 255, .8));
+  }
+  .scroll-cue svg { display: block; width: 100%; height: 100%; }
+  .letter.scrollable .scroll-cue {
+    opacity: .9;
+    animation: cueFloat 1.8s ease-in-out infinite;
+  }
+  @keyframes cueFloat {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(5px); }
+  }
+
+  /* ---------- 信纸本体 ---------- */
+  .paper {
+    position: relative;
+    max-height: 88vh;
+    max-height: min(87dvh, 760px);
+    min-height: min(58dvh, 460px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    scrollbar-width: none;
+    border-radius: 10px;
+    padding: clamp(32px, 6.4vw, 52px) clamp(26px, 5.6vw, 48px) clamp(28px, 4.6vw, 38px);
+    background-color: var(--paper-top);
+    background-image:
+      repeating-linear-gradient(45deg,  rgba(190, 155, 120, .022) 0 1px, transparent 1px 5px),
+      repeating-linear-gradient(-45deg, rgba(190, 155, 120, .018) 0 1px, transparent 1px 7px),
+      radial-gradient(circle at 50% 0%,   rgba(255, 255, 255, .95), transparent 52%),
+      radial-gradient(circle at 14% 88%,  rgba(255, 226, 238, .5), transparent 46%),
+      linear-gradient(180deg, var(--paper-top), var(--paper-mid) 58%, var(--paper-bot));
+    box-shadow:
+      0 34px 78px -24px rgba(196, 113, 158, .52),
+      0 6px 22px -10px rgba(190, 140, 100, .3),
+      0 0 0 1px rgba(232, 200, 126, .5),
+      inset 0 0 0 1px rgba(255, 255, 255, .95),
+      inset 0 0 0 8px var(--paper-top),
+      inset 0 0 0 9px var(--gold-line),
+      inset 0 0 0 10px rgba(255, 255, 255, .8),
+      inset 0 0 100px rgba(255, 208, 228, .22);
+  }
+  .paper::-webkit-scrollbar { display: none; }
+
+  .view-letter { transition: opacity .45s ease, transform .45s ease; }
+
+  /* 烫金流光标题 */
+  .letter-title {
+    margin: 0;
+    text-align: center;
+    font-size: clamp(21px, 5.7vw, 27px);
+    font-weight: 400;
+    letter-spacing: .22em;
+    text-indent: .22em;
+    background: linear-gradient(100deg,
+      var(--gold-deep) 0%,
+      var(--gold-mid)  20%,
+      var(--gold-light) 36%,
+      var(--gold-mid)  50%,
+      var(--gold-deep) 62%,
+      var(--gold-mid)  82%,
+      var(--gold-deep) 100%);
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    animation: goldShine 6.5s linear infinite;
+    filter:
+      drop-shadow(0 1px 1px rgba(255, 255, 255, .85))
+      drop-shadow(0 0 10px rgba(232, 200, 126, .35));
+  }
+  @keyframes goldShine { to { background-position: -220% 0; } }
+
+  .salutation {
+    margin: 14px 0 0;
+    text-align: center;
+    font-size: clamp(12px, 3.2vw, 13.5px);
+    letter-spacing: .36em;
+    text-indent: .36em;
+    color: var(--ink-faint);
+  }
+
+  .deco {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 13px;
+    margin: 20px 0 28px;
+    font-size: 12px;
+    color: #d4af6a;
+    text-shadow: 0 0 8px rgba(240, 200, 120, .6);
+  }
+  .deco::before, .deco::after {
+    content: '';
+    height: 1px;
+    width: clamp(36px, 14vw, 62px);
+  }
+  .deco::before { background: linear-gradient(90deg, transparent, #d4af6a); }
+  .deco::after  { background: linear-gradient(90deg, #d4af6a, transparent); }
+
+  .content {
+    margin: 0;
+    min-height: 2.4em;
+    white-space: pre-line;
+    font-size: clamp(15px, 4.1vw, 17px);
+    line-height: 2.08;
+    letter-spacing: .045em;
+    color: var(--ink);
+  }
+  .content.typing::after {
+    content: '|';
+    margin-left: 1px;
+    color: var(--pink-3);
+    animation: blink 1s steps(1) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .sign {
+    margin-top: 28px;
+    text-align: right;
+    font-size: 13.5px;
+    letter-spacing: .06em;
+    color: var(--ink-muted);
+    opacity: 0;
+    transition: opacity .9s ease;
+  }
+  .sign.show { opacity: 1; }
+
+  /* ============================================================
+     4. 按钮
+     ============================================================ */
+  .btns {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 28px;
+    opacity: 0;
+    transform: translateY(15px);
+    pointer-events: none;
+    transition: opacity .6s ease, transform .6s ease;
+  }
+  .btns.show {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+
+  .btn {
+    position: relative;
+    overflow: hidden;
+    font-family: inherit;
+    font-size: 16px;
+    letter-spacing: .08em;
+    padding: 12px 28px;
+    min-height: 46px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    transition:
+      transform .35s var(--ease-pop),
+      box-shadow .3s ease,
+      opacity .45s ease,
+      filter .2s ease;
+  }
+
+  .btn::after {
+    content: '';
+    position: absolute;
+    top: -20%;
+    left: -120%;
+    width: 70%;
+    height: 140%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .55), transparent);
+    transform: skewX(-22deg);
+    pointer-events: none;
+  }
+
+  #yes {
+    position: relative;
+    z-index: 2;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(170, 30, 90, .35);
+    background: linear-gradient(135deg, var(--pink-1) 0%, var(--pink-2) 52%, var(--pink-3) 100%);
+    box-shadow:
+      0 12px 28px -8px rgba(255, 80, 150, .82),
+      0 0 22px rgba(255, 120, 170, .45),
+      0 0 0 2px rgba(240, 217, 160, .62),
+      inset 0 1px 1px rgba(255, 255, 255, .55),
+      inset 0 -2px 4px rgba(160, 20, 80, .28);
+    transform-origin: center bottom;
+  }
+  #yes::after { animation: btnShine 3.4s ease-in-out infinite; }
+  @keyframes btnShine {
+    0%, 58%   { left: -120%; }
+    88%, 100% { left: 150%; }
+  }
+
+  #no {
+    position: relative;
+    z-index: 1;
+    color: var(--ink-muted);
+    background: linear-gradient(180deg, #ffffff, #fdf4f8);
+    box-shadow:
+      0 6px 16px -6px rgba(180, 140, 165, .55),
+      0 0 0 1px rgba(240, 217, 160, .55),
+      inset 0 1px 1px rgba(255, 255, 255, .9);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    #yes:hover {
+      filter: brightness(1.05);
+      box-shadow:
+        0 16px 34px -8px rgba(255, 80, 150, .9),
+        0 0 28px rgba(255, 120, 170, .55),
+        0 0 0 2px rgba(240, 217, 160, .75),
+        inset 0 1px 1px rgba(255, 255, 255, .6);
+    }
+    #no:hover { filter: brightness(1.02); }
+  }
+  .btn:active { filter: brightness(.97); }
+
+  /* ============================================================
+     5. 成功画面
+     ============================================================ */
+  .view-success {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: clamp(230px, 44dvh, 340px);
+    padding: 18px 0;
+    opacity: 0;
+    transform: scale(.92);
+    transition: opacity .7s ease, transform .7s var(--ease-soft);
+  }
+  .view-success.in {
+    opacity: 1;
+    transform: none;
+  }
+
+  .heart-stage {
+    position: relative;
+    width:  clamp(110px, 30vw, 132px);
+    height: clamp(110px, 30vw, 132px);
+    display: grid;
+    place-items: center;
+    margin-bottom: 18px;
+  }
+
+  .starburst {
+    position: absolute;
+    inset: -34px;
+    background: repeating-conic-gradient(from 0deg,
+      rgba(255, 214, 140, .34) 0deg 3.6deg,
+      transparent 3.6deg 14deg);
+    -webkit-mask: radial-gradient(circle, #000 22%, rgba(0, 0, 0, .55) 44%, transparent 70%);
+    mask: radial-gradient(circle, #000 22%, rgba(0, 0, 0, .55) 44%, transparent 70%);
+    animation: spin 30s linear infinite;
+    pointer-events: none;
+    will-change: transform;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .big-heart {
+    position: relative;
+    width:  clamp(76px, 21vw, 92px);
+    height: clamp(76px, 21vw, 92px);
+    filter:
+      drop-shadow(0 12px 26px rgba(255, 95, 158, .55))
+      drop-shadow(0 0 22px rgba(255, 180, 210, .6));
+    animation: beat 1.35s ease-in-out infinite;
+  }
+  @keyframes beat {
+    0%, 100% { transform: scale(1); }
+    14%      { transform: scale(1.14); }
+    28%      { transform: scale(1); }
+    42%      { transform: scale(1.09); }
+    56%      { transform: scale(1); }
+  }
+
+  .view-success h2 {
+    margin: 0 0 15px;
+    font-size: clamp(20px, 5.3vw, 26px);
+    font-weight: 400;
+    letter-spacing: .16em;
+    text-indent: .16em;
+    background: linear-gradient(100deg, #c93a72, #ff88b8 35%, #c93a72 70%, #ff88b8 100%);
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    animation: goldShine 7s linear infinite;
+    filter: drop-shadow(0 2px 8px rgba(255, 120, 170, .35));
+  }
+  .view-success p {
+    margin: 0;
+    font-size: clamp(15px, 4.1vw, 17px);
+    line-height: 2.1;
+    letter-spacing: .04em;
+    color: var(--ink-soft);
+  }
+
+  /* ============================================================
+     6. 响应式
+     ============================================================ */
+  @media (max-width: 640px) {
+    body::before, body::after { filter: blur(38px); opacity: .42; }
+
+    .stage {
+      padding: 14px;
+      padding-top:    max(14px, env(safe-area-inset-top));
+      padding-right:  max(14px, env(safe-area-inset-right));
+      padding-bottom: max(14px, env(safe-area-inset-bottom));
+      padding-left:   max(14px, env(safe-area-inset-left));
+    }
+
+    .envelope-wrap { width: min(84vw, 300px); }
+    .envelope-wrap.open .envelope {
+      transform: scale(1.08) rotateX(26deg) translateY(-18px);
+    }
+    .hint { bottom: -38px; font-size: 12.5px; }
+
+    .letter { width: min(94vw, 540px); }
+    .paper {
+      max-height: min(86dvh, 720px);
+      min-height: min(60dvh, 460px);
+      padding: clamp(26px, 7vw, 36px) clamp(20px, 5.6vw, 30px) clamp(22px, 5.4vw, 28px);
+    }
+    .letter-title { font-size: clamp(20px, 5.8vw, 24px); }
+    .salutation   { margin-top: 11px; }
+    .deco         { margin: 16px 0 22px; }
+    .content {
+      font-size: clamp(15.5px, 4.3vw, 17px);
+      line-height: 1.98;
+    }
+    .sign { margin-top: 23px; font-size: 13px; }
+    .btns { gap: 12px; margin-top: 23px; }
+    .btn  { font-size: 16px; padding: 12px 23px; min-height: 46px; }
+
+    .heart-stage  { margin-bottom: 14px; }
+    .view-success h2 { font-size: clamp(21px, 5.6vw, 25px); }
+    .view-success p  { font-size: clamp(15px, 4.2vw, 16.5px); line-height: 2; }
+  }
+
+  @media (max-height: 500px) and (orientation: landscape) {
+    .envelope-wrap { width: min(46vh, 260px); }
+    .letter { width: min(80vw, 540px); }
+    .paper  { max-height: 82dvh; min-height: 0; }
+    .letter-title { font-size: 19px; }
+    .deco   { margin: 10px 0 16px; }
+    .content { line-height: 1.8; }
+    .btns   { margin-top: 16px; }
+    .heart-stage { width: 84px; height: 84px; margin-bottom: 8px; }
+    .big-heart   { width: 62px; height: 62px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bg" aria-hidden="true"></canvas>
+
+<div class="stage">
+
+  <!-- ==================== 信封 ==================== -->
+  <div class="envelope-wrap" id="envelopeWrap">
+    <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="打开信封，致韩言">
+      <div class="env-body">
+        <div class="side left"></div>
+        <div class="side right"></div>
+        <div class="side bottom"></div>
+      </div>
+      <div class="env-flap"></div>
+      <div class="env-label">致 韩 言</div>
+      <div class="seal">
+        <svg viewBox="0 0 32 32" aria-hidden="true">
+          <defs>
+            <linearGradient id="sealHeart" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#e86a98"/>
+              <stop offset="1" stop-color="#a83868"/>
+            </linearGradient>
+          </defs>
+          <path d="M16 27C16 27 4 19 4 11.8C4 7.4 7.6 4.4 11.6 4.4C14 4.4 15.6 5.6 16 6.9C16.4 5.6 18 4.4 20.4 4.4C24.4 4.4 28 7.4 28 11.8C28 19 16 27 16 27Z" fill="url(#sealHeart)"/>
+        </svg>
+      </div>
+      <div class="hint">轻 触 打 开</div>
+    </div>
+  </div>
+
+  <!-- ==================== 信纸 ==================== -->
+  <div class="letter" id="letter">
+    <span class="corner tl" aria-hidden="true"></span>
+    <span class="corner tr" aria-hidden="true"></span>
+    <span class="corner bl" aria-hidden="true"></span>
+    <span class="corner br" aria-hidden="true"></span>
+
+    <div class="paper" id="paper" role="region" aria-label="给韩言的信">
+
+      <!-- 信的内容 -->
+      <div class="view-letter" id="viewLetter">
+        <h1 class="letter-title">致 韩 言</h1>
+        <p class="salutation">展 信 舒 颜 · 见 字 如 晤</p>
+        <div class="deco" aria-hidden="true">✦</div>
+        <p class="content typing" id="typed"></p>
+        <div class="sign" id="sign">—— 愿作井垣，守你一汪清泉的人</div>
+        <div class="btns" id="btns">
+          <button class="btn" id="yes" type="button">我愿意 ♡</button>
+          <button class="btn" id="no"  type="button">再想想…</button>
+        </div>
+      </div>
+
+      <!-- 成功画面 -->
+      <div class="view-success" id="viewSuccess">
+        <div class="heart-stage">
+          <div class="starburst" aria-hidden="true"></div>
+          <svg class="big-heart" viewBox="0 0 32 32" aria-hidden="true">
+            <defs>
+              <linearGradient id="heartGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0"   stop-color="#ffb0d2"/>
+                <stop offset=".55" stop-color="#ff4b93"/>
+                <stop offset="1"   stop-color="#d42a6f"/>
+              </linearGradient>
+              <radialGradient id="heartGlow" cx=".34" cy=".3" r=".5">
+                <stop offset="0" stop-color="#ffffff" stop-opacity=".85"/>
+                <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <path d="M16 28C16 28 3 19.5 3 11.5C3 6.8 6.8 3.5 11 3.5C13.5 3.5 15.5 4.8 16 6.2C16.5 4.8 18.5 3.5 21 3.5C25.2 3.5 29 6.8 29 11.5C29 19.5 16 28 16 28Z" fill="url(#heartGrad)"/>
+            <ellipse cx="10.5" cy="9.5" rx="3.6" ry="2.4" transform="rotate(-28 10.5 9.5)" fill="url(#heartGlow)"/>
+          </svg>
+        </div>
+        <h2>韩言，我等到你了 ♡</h2>
+        <p>从今往后，<br>你的名字，是我念过最短的情诗。</p>
+      </div>
+
+    </div>
+
+    <div class="scroll-cue" id="scrollCue" aria-hidden="true">
+      <svg viewBox="0 0 24 24">
+        <path d="M6.5 9.5L12 15l5.5-5.5" fill="none" stroke="currentColor"
+              stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ============================================================
+     0. 环境探测
+     ============================================================ */
+  var mqMobile     = window.matchMedia('(max-width: 640px)');
+  var mqReduce     = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var isMobile     = mqMobile.matches;
+  var reduceMotion = mqReduce.matches;
+
+  mqMobile.addEventListener && mqMobile.addEventListener('change', function (e) {
+    isMobile = e.matches;
+  });
+
+  /* ============================================================
+     1. 画布与精灵缓存
+     ============================================================ */
+  var canvas = document.getElementById('bg');
+  var ctx    = canvas.getContext('2d');
+  var W = 0, H = 0;
+
+  var SPRITE_SIZE = 128;
+  var SPRITE_HALF = SPRITE_SIZE / 2;
+  var BASE_S      = 24;
+  var TAU         = Math.PI * 2;
+
+  /* 爱心色相范围与缓存档位 */
+  var HUE_MIN  = 322;
+  var HUE_MAX  = 378;
+  var HUE_STEP = 8;
+
+  var heartSprites = [];
+
+  function traceHeart(c, s) {
+    c.beginPath();
+    c.moveTo(0, s * 0.35);
+    c.bezierCurveTo(-s * 1.1, -s * 0.45, -s * 0.55, -s * 1.35, 0, -s * 0.45);
+    c.bezierCurveTo( s * 0.55, -s * 1.35,  s * 1.1, -s * 0.45, 0, s * 0.35);
+  }
+
+  function makeHeartSprite(hue) {
+    var cv = document.createElement('canvas');
+    cv.width  = SPRITE_SIZE;
+    cv.height = SPRITE_SIZE;
+    var c = cv.getContext('2d');
+    c.translate(SPRITE_HALF, SPRITE_HALF);
+
+    /* 柔光 */
+    c.globalAlpha = 0.3;
+    c.fillStyle = 'hsl(' + hue + ', 100%, 90%)';
+    traceHeart(c, BASE_S * 1.55);
+    c.fill();
+
+    /* 主体渐变 */
+    c.globalAlpha = 1;
+    var g = c.createLinearGradient(0, -BASE_S, 0, BASE_S);
+    g.addColorStop(0,    'hsl(' + hue + ', 96%, 84%)');
+    g.addColorStop(0.55, 'hsl(' + hue + ', 90%, 72%)');
+    g.addColorStop(1,    'hsl(' + hue + ', 86%, 62%)');
+    c.fillStyle = g;
+    traceHeart(c, BASE_S);
+    c.fill();
+
+    /* 高光 */
+    c.globalAlpha = 0.85;
+    c.fillStyle = '#ffffff';
+    c.beginPath();
+    c.ellipse(-BASE_S * 0.3, -BASE_S * 0.6, BASE_S * 0.18, BASE_S * 0.11, -0.62, 0, TAU);
+    c.fill();
+
+    return cv;
+  }
+
+  for (var h = HUE_MIN; h <= HUE_MAX; h += HUE_STEP) {
+    heartSprites.push(makeHeartSprite(h));
+  }
+
+  function spriteFor(hue) {
+    var i = Math.round((hue - HUE_MIN) / HUE_STEP);
+    if (i < 0) i = 0;
+    else if (i >= heartSprites.length) i = heartSprites.length - 1;
+    return heartSprites[i];
+  }
+
+  /** 用精灵绘制一颗爱心 */
+  function drawHeart(x, y, s, rot, alpha, hue) {
+    var sp = spriteFor(hue);
+    var dw = SPRITE_SIZE * (s / BASE_S);
+    ctx.globalAlpha = alpha;
+    ctx.save();
+    ctx.translate(x, y);
+    if (rot) ctx.rotate(rot);
+    ctx.drawImage(sp, -dw * 0.5, -dw * 0.5, dw, dw);
+    ctx.restore();
+  }
+
+  function resize() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width  = Math.floor(W * dpr);
+    canvas.height = Math.floor(H * dpr);
+    canvas.style.width  = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  /* ============================================================
+     2. 粒子
+     ============================================================ */
+
+  /* ---------- 飘落爱心 ---------- */
+  function Petal(init) { this.reset(init); }
+
+  Petal.prototype.reset = function (init) {
+    this.x     = Math.random() * W;
+    this.y     = init ? Math.random() * H : -40 - Math.random() * 140;
+    this.size  = 4.5 + Math.random() * 9;
+    this.vy    = 0.32 + Math.random() * 0.82;
+    this.vx    = (Math.random() - 0.5) * 0.45;
+    this.rot   = Math.random() * TAU;
+    this.vr    = (Math.random() - 0.5) * 0.032;
+    this.phase = Math.random() * TAU;
+    this.ps    = 0.006 + Math.random() * 0.014;
+    this.alpha = 0.22 + Math.random() * 0.44;
+    this.hue   = HUE_MIN + Math.random() * (HUE_MAX - HUE_MIN);
+  };
+
+  Petal.prototype.update = function () {
+    this.phase += this.ps;
+    this.y += this.vy;
+    this.x += this.vx + Math.sin(this.phase) * 0.68;
+    this.rot += this.vr;
+    if (this.y > H + 70 || this.x < -90 || this.x > W + 90) this.reset(false);
+  };
+
+  Petal.prototype.draw = function () {
+    drawHeart(this.x, this.y, this.size, this.rot, this.alpha, this.hue);
+  };
+
+  /* ---------- 星尘 ---------- */
+  function Sparkle(init) { this.reset(init); }
+
+  Sparkle.prototype.reset = function (init) {
+    this.x     = Math.random() * W;
+    this.y     = init ? Math.random() * H : Math.random() * H;
+    this.r     = 0.55 + Math.random() * 1.5;
+    this.phase = Math.random() * TAU;
+    this.speed = 0.012 + Math.random() * 0.03;
+    this.amp   = 0.28 + Math.random() * 0.55;
+    this.hue   = 40 + Math.random() * 26;
+    this.drift = (Math.random() - 0.5) * 0.14;
+  };
+
+  Sparkle.prototype.update = function () {
+    this.phase += this.speed;
+    this.x += this.drift;
+    if (this.x < -12)      this.x = W + 12;
+    else if (this.x > W + 12) this.x = -12;
+  };
+
+  Sparkle.prototype.draw = function () {
+    var a = 0.12 + Math.abs(Math.sin(this.phase)) * this.amp;
+    ctx.globalAlpha = a;
+    ctx.fillStyle = 'hsl(' + this.hue + ', 100%, 86%)';
+
+    if (this.r < 1.15) {
+      ctx.fillRect(this.x - this.r, this.y - this.r, this.r * 2, this.r * 2);
+    } else {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, TAU);
+      ctx.fill();
+
+      /* 大星尘的十字光芒 */
+      ctx.globalAlpha = a * 0.5;
+      ctx.fillStyle = 'hsl(' + this.hue + ', 100%, 92%)';
+      ctx.fillRect(this.x - this.r * 2.6, this.y - 0.3, this.r * 5.2, 0.6);
+      ctx.fillRect(this.x - 0.3, this.y - this.r * 2.6, 0.6, this.r * 5.2);
+    }
+  };
+
+  var petals   = [];
+  var sparkles = [];
+
+  function initParticles() {
+    petals.length   = 0;
+    sparkles.length = 0;
+
+    var pc = W < 480 ? 15 : (W < 768 ? 24 : 42);
+    var sc = W < 480 ? 20 : (W < 768 ? 30 : 50);
+
+    for (var i = 0; i < pc; i++) petals.push(new Petal(true));
+    for (var j = 0; j < sc; j++) sparkles.push(new Sparkle(true));
+  }
+  initParticles();
+
+  /* ---------- 爆发爱心 ---------- */
+  var burst = [];
+
+  function burstHearts(x, y, n, baseHue) {
+    for (var i = 0; i < n; i++) {
+      var ang = Math.random() * TAU;
+      var sp  = 1.6 + Math.random() * 9.5;
+      var hue = (baseHue == null)
+        ? HUE_MIN + Math.random() * (HUE_MAX - HUE_MIN)
+        : baseHue + (Math.random() - 0.5) * 22;
+
+      burst.push({
+        x: x, y: y,
+        vx: Math.cos(ang) * sp,
+        vy: Math.sin(ang) * sp - 2.2,
+        size: 3.6 + Math.random() * 9,
+        rot: Math.random() * TAU,
+        vr: (Math.random() - 0.5) * 0.24,
+        life: 1,
+        decay: 0.0055 + Math.random() * 0.012,
+        hue: hue
+      });
+    }
+  }
+
+  /* ============================================================
+     3. 主循环
+     ============================================================ */
+  var rafId        = null;
+  var lastFrame    = 0;
+  var prevRealTime = 0;
+  var slowFrames   = 0;
+  var degraded     = false;
+
+  function render(now) {
+    ctx.clearRect(0, 0, W, H);
+
+    /* 星尘 */
+    for (var i = 0; i < sparkles.length; i++) {
+      sparkles[i].update();
+      sparkles[i].draw();
+    }
+
+    /* 飘落爱心 */
+    for (var j = 0; j < petals.length; j++) {
+      petals[j].update();
+      petals[j].draw();
+    }
+
+    /* 爆发爱心 */
+    for (var m = burst.length - 1; m >= 0; m--) {
+      var b = burst[m];
+      b.vy += 0.092;
+      b.vx *= 0.992;
+      b.x  += b.vx;
+      b.y  += b.vy;
+      b.rot += b.vr;
+      b.life -= b.decay;
+
+      if (b.life <= 0) {
+        burst.splice(m, 1);
+        continue;
+      }
+      drawHeart(b.x, b.y, b.size, b.rot, Math.max(0, b.life), b.hue);
+    }
+
+    /* 性能自适应降级 */
+    if (!degraded && prevRealTime) {
+      var realDt = now - prevRealTime;
+      if (realDt > 40) slowFrames++;
+      else if (slowFrames > 0) slowFrames--;
+
+      if (slowFrames > 70) {
+        degraded = true;
+        petals.length   = Math.max(8,  Math.floor(petals.length * 0.6));
+        sparkles.length = Math.max(10, Math.floor(sparkles.length * 0.6));
+      }
+    }
+    prevRealTime = now;
+  }
+
+  function frame(now) {
+    rafId = requestAnimationFrame(frame);
+
+    /* 帧率上限：移动端 45fps，桌面 60fps */
+    var minMs = isMobile ? 1000 / 45 : 1000 / 60;
+    if (now - lastFrame < minMs * 0.9) return;
+    lastFrame = now;
+
+    render(now);
+  }
+
+  function startLoop() {
+    if (rafId !== null) return;
+    lastFrame    = 0;
+    prevRealTime = 0;
+    rafId = requestAnimationFrame(frame);
+  }
+
+  function stopLoop() {
+    if (rafId === null) return;
+    cancelAnimationFrame(rafId);
+    rafId = null;
+  }
+
+  startLoop();
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) stopLoop();
+    else startLoop();
+  });
+
+  /* ============================================================
+     4. 情书正文
+     ============================================================ */
+  var LETTER_TEXT = [
+    '韩言，韩言。',
+    '',
+    '《说文》有云：「韩，井垣也。」',
+    '原是井边一圈木栏，',
+    '围住一汪清泉，不叫风尘惊扰，',
+    '只候一个人俯身来饮。',
+    '',
+    '而「言」，是心之所发，',
+    '是千回百转后，终于出口的那一句。',
+    '',
+    '你的名字，一半是守候，一半是低语。',
+    '古人说「言念君子，温其如玉」，',
+    '我每唤一次你的名字，',
+    '都似掬起一捧凉月，掌心便生了暖。',
+    '',
+    '从前的日子是素的，',
+    '自你来了，素里也开出花。',
+    '',
+    '想陪你把长路走得很慢，',
+    '想在每一个黄昏，',
+    '把你的名字念得很轻。',
+    '',
+    '所以，韩言——',
+    '可以做我的女朋友吗？'
+  ].join('\n');
+
+  /* ============================================================
+     5. DOM
+     ============================================================ */
+  var envelopeWrap = document.getElementById('envelopeWrap');
+  var envelope     = document.getElementById('envelope');
+  var letter       = document.getElementById('letter');
+  var paper        = document.getElementById('paper');
+  var typedEl      = document.getElementById('typed');
+  var btns         = document.getElementById('btns');
+  var sign         = document.getElementById('sign');
+  var yesBtn       = document.getElementById('yes');
+  var noBtn        = document.getElementById('no');
+  var viewLetter   = document.getElementById('viewLetter');
+  var viewSuccess  = document.getElementById('viewSuccess');
+
+  /* ============================================================
+     6. 打开信封
+     ============================================================ */
+  var opened = false;
+
+  function openEnvelope() {
+    if (opened) return;
+    opened = true;
+
+    /* 开启瞬间的双色粒子 */
+    var r  = envelope.getBoundingClientRect();
+    var cx = r.left + r.width / 2;
+    var cy = r.top  + r.height / 2;
+    burstHearts(cx, cy, 30, 44);
+    burstHearts(cx, cy + r.height * 0.12, 22, 336);
+
+    envelopeWrap.classList.add('open');
+
+    setTimeout(function () {
+      letter.classList.add('show');
+      setTimeout(startTyping, 600);
+    }, 480);
+  }
+
+  envelope.addEventListener('click', openEnvelope);
+  envelope.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openEnvelope();
+    }
+  });
+
+  /* ============================================================
+     7. 打字机
+     ============================================================ */
+  var idx             = 0;
+  var typingTimer     = null;
+  var typingDone      = false;
+  var buttonsRevealed = false;
+  var userScrolled    = false;
+  var autoScrolling   = false;
+
+  function scrollToBottom() {
+    autoScrolling = true;
+    paper.scrollTop = paper.scrollHeight;
+    setTimeout(function () { autoScrolling = false; }, 60);
+  }
+
+  function startTyping() {
+    /* 减少动效偏好：直接呈现全文 */
+    if (reduceMotion) {
+      typedEl.classList.remove('typing');
+      typedEl.textContent = LETTER_TEXT;
+      typingDone = true;
+      revealButtons();
+      updateScrollHint();
+      return;
+    }
+
+    userScrolled = false;
+    typedEl.classList.add('typing');
+    idx = 0;
+    typedEl.textContent = '';
+    typingDone = false;
+    buttonsRevealed = false;
+    typeNext();
+  }
+
+  function typeNext() {
+    if (typingDone) return;
+
+    if (idx < LETTER_TEXT.length) {
+      var ch = LETTER_TEXT.charAt(idx);
+      idx++;
+      typedEl.textContent = LETTER_TEXT.slice(0, idx);
+
+      if (!userScrolled && paper.scrollHeight > paper.clientHeight) {
+        scrollToBottom();
+      }
+
+      var base  = isMobile ? 24 : 32;
+      var delay = base + Math.random() * 26;
+
+      if (ch === '\n') delay = 150;
+      if ('，。？！—、；：'.indexOf(ch) !== -1) delay = 200;
+
+      typingTimer = setTimeout(typeNext, delay);
+    } else {
+      finishTyping(false);
+    }
+  }
+
+  function finishTyping(immediate) {
+    if (typingDone) return;
+    typingDone = true;
+    clearTimeout(typingTimer);
+
+    typedEl.textContent = LETTER_TEXT;
+    typedEl.classList.remove('typing');
+
+    if (immediate) {
+      scrollToBottom();
+      revealButtons();
+    } else {
+      setTimeout(revealButtons, 280);
+    }
+  }
+
+  function revealButtons() {
+    if (buttonsRevealed) return;
+    buttonsRevealed = true;
+    sign.classList.add('show');
+    btns.classList.add('show');
+    setTimeout(updateScrollHint, 80);
+  }
+
+  /* 点击信纸跳过打字机 */
+  paper.addEventListener('click', function (e) {
+    if (e.target.closest('button')) return;
+    if (!typingDone) finishTyping(true);
+  });
+
+  /* ============================================================
+     8. 滚动提示
+     ============================================================ */
+  var scrollHintOn = false;
+
+  function updateScrollHint() {
+    if (!letter.classList.contains('show')) return;
+
+    var canScroll = paper.scrollHeight > paper.clientHeight + 6;
+    var atBottom  = paper.scrollTop + paper.clientHeight >= paper.scrollHeight - 12;
+    var should    = canScroll && !atBottom;
+
+    if (should !== scrollHintOn) {
+      scrollHintOn = should;
+      letter.classList.toggle('scrollable', should);
+    }
+  }
+
+  paper.addEventListener('scroll', function () {
+    if (!autoScrolling) userScrolled = true;
+    updateScrollHint();
+  }, { passive: true });
+
+  window.addEventListener('resize', function () {
+    updateScrollHint();
+    if (degraded) return;
+    initParticles();
+  });
+
+  /* ============================================================
+     9. “再想想”按钮
+     ============================================================ */
+  var NO_TEXTS = [
+    '再想想…',
+    '真的不再想想？',
+    '韩言，别走',
+    '我会难过的…',
+    '再考虑一下嘛',
+    '好吧…其实我也愿意'
+  ];
+
+  var noCount = 0;
+
+  noBtn.addEventListener('click', function () {
+    if (noCount >= NO_TEXTS.length - 1) return;
+    noCount++;
+
+    noBtn.textContent = NO_TEXTS[noCount];
+
+    /* 小范围随机躲闪，不累积、不越界 */
+    var dx = (Math.random() - 0.5) * 72;
+    var dy = (Math.random() - 0.5) * 48;
+    var shrink = Math.max(0.62, 1 - noCount * 0.075);
+
+    noBtn.style.transform =
+      'translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px) scale(' + shrink + ')';
+
+    /* “我愿意”随点击缓慢变大 */
+    var grow = 1 + Math.min(noCount * 0.1, 0.35);
+    yesBtn.style.transform = 'scale(' + grow + ')';
+
+    /* 最后消失 */
+    if (noCount >= NO_TEXTS.length - 1) {
+      setTimeout(function () {
+        noBtn.style.opacity = '0';
+        noBtn.style.pointerEvents = 'none';
+      }, 260);
+    }
+  });
+
+  /* ============================================================
+     10. 同意
+     ============================================================ */
+  var answered = false;
+
+  yesBtn.addEventListener('click', function () {
+    if (answered) return;
+    answered = true;
+
+    yesBtn.disabled = true;
+
+    var r  = yesBtn.getBoundingClientRect();
+    var cx = r.left + r.width / 2;
+    var cy = r.top  + r.height / 2;
+
+    /* 多段粒子庆祝 */
+    burstHearts(cx, cy, 56, 336);
+    burstHearts(cx, cy, 30, 44);
+
+    setTimeout(function () {
+      burstHearts(W / 2, H * 0.42, 38, 336);
+      burstHearts(W / 2, H * 0.42, 22, 44);
+    }, 220);
+
+    setTimeout(function () {
+      burstHearts(W * 0.3, H * 0.6, 24, 330);
+      burstHearts(W * 0.7, H * 0.6, 24, 330);
+      burstHearts(W * 0.5, H * 0.3, 18, 46);
+    }, 500);
+
+    /* 切换画面 */
+    viewLetter.style.opacity   = '0';
+    viewLetter.style.transform = 'scale(.96)';
+
+    setTimeout(function () {
+      viewLetter.style.display  = 'none';
+      viewSuccess.style.display = 'flex';
+
+      scrollHintOn = false;
+      letter.classList.remove('scrollable');
+
+      paper.scrollTop = 0;
+
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          viewSuccess.classList.add('in');
+        });
+      });
+    }, 460);
+  });
+
+})();
+</script>
+</body>
+</html>
